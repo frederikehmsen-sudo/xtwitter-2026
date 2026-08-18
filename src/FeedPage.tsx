@@ -4,17 +4,27 @@ import {useEffect, useState} from "react";
 
 export function FeedPage() {
     const [feed, setFeed] = useState<Post[]>([])
+    const [query, setQuery] = useState("")
 
     useEffect(() => {
-        fetch('https://dummyjson.com/posts').then(res => {
-            res.json().then(json => {
-                setFeed(json.posts)
-            })
-        })
-    }, [])
+        const url = query.trim()
+            ? `https://dummyjson.com/posts/tag/${encodeURIComponent(query)}`
+            : 'https://dummyjson.com/posts'
+        fetch(url)
+            .then(res => res.json())
+                .then(json => setFeed(json.posts))
+    }, [query])
 
     return (
         <div className="feed">
+            <input
+            className="search-input"
+            type="text"
+            placeholder="Search posts..."
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            />
+
             {feed.map(f => (
                 <div className="post-card" key={f.id}>
                     <h3 className="post-title">{f.title}</h3>
@@ -26,7 +36,13 @@ export function FeedPage() {
                     </div>
                     <div className="post-tags">
                         {f.tags.map(tag => (
-                            <span className="post-tag" key={tag}>#{tag}</span>
+                            <span
+                                className="post-tag"
+                                key={tag}
+                                onClick={() => setQuery(tag)}
+                                style={{cursor: 'pointer'}}>
+                                #{tag}
+                            </span>
                         ))}
                     </div>
                 </div>
