@@ -3,17 +3,34 @@ import "./index.css";
 import {useEffect, useState} from "react";
 
 export function FeedPage() {
-    const [feed, setFeed] = useState<Post[]>([])
+    const [allPosts, setAllPosts] = useState<Post[]>([])
     const [query, setQuery] = useState("")
 
     useEffect(() => {
-        const url = query.trim()
-            ? `https://dummyjson.com/posts/tag/${encodeURIComponent(query)}`
-            : 'https://dummyjson.com/posts'
-        fetch(url)
+        fetch('https://dummyjson.com/posts?limit=30')
             .then(res => res.json())
-                .then(json => setFeed(json.posts))
-    }, [query])
+                .then(json => setAllPosts(json.posts))
+    }, [])
+
+    async function deletePost(id: number){
+        const res = await fetch(`https://dummyjson.com/posts/${id}`, {
+            method: 'DELETE',
+        })
+        const data = await res.json()
+
+        if (data.isDeleted) {
+            setAllPosts(prev => prev.filter(post => post.id !== id))
+        }
+    }
+
+    const q = query.trim().toLowerCase()
+    const feed = q
+        ? allPosts.filter(post =>
+            post.title.toLowerCase().includes(q) ||
+            post.body.toLowerCase().includes(q) ||
+            post.tags.some(tag => tag.toLowerCase().includes(q))
+        )
+        : allPosts
 
     return (
         <div className="feed">
@@ -45,6 +62,9 @@ export function FeedPage() {
                             </span>
                         ))}
                     </div>
+                    <button className="delete-button" onClick={() => deletePost(f.id)}>
+                        Delete
+                    </button>
                 </div>
             ))}
             <Outlet/>
