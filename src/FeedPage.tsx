@@ -1,4 +1,4 @@
-import {Outlet} from "react-router"
+import {Outlet, useNavigate} from "react-router"
 import "./index.css";
 import {useEffect, useState} from "react";
 
@@ -7,6 +7,9 @@ export function FeedPage() {
     const [query, setQuery] = useState("")
     const [newTitle, setNewTitle] = useState("")
     const [newBody, setNewBody] = useState("")
+
+    const navigate= useNavigate();
+
 
     useEffect(() => {
         fetch('https://dummyjson.com/posts?limit=30')
@@ -58,6 +61,10 @@ export function FeedPage() {
         )
         : allPosts
 
+    function openPostPage(id: number) {
+        navigate(`/feed/${id}`)
+    }
+
     return (
         <div className="feed">
             <input value={newTitle} onChange={e =>
@@ -76,7 +83,7 @@ export function FeedPage() {
 
             {feed.map(f => (
                 <div className="post-card" key={f.id}>
-                    <h3 className="post-title">{f.title}</h3>
+                    <h3 onClick={() => openPostPage(f.id)} className="post-title">{f.title}</h3>
                     <p className="post-body">{f.body}</p>
                     <div className="post-meta">
                         <span>👍 {f.reactions.likes}</span>

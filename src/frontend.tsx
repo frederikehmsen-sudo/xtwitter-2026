@@ -21,14 +21,12 @@ const app = (
         element:<APITester />
     },
     {
-path:"/feed",
-element: <FeedPage />,
-children: [
+        path: "/feed",
+        element: <FeedPage/>,
+    },
     {
-        path: ':id',
-        element: <PostsPage />
-    }
-]
+        path: 'feed/:id',
+        element: <PostsPage />,
     }
 ])}>
 </RouterProvider>
