@@ -5,6 +5,8 @@ import {useEffect, useState} from "react";
 export function FeedPage() {
     const [allPosts, setAllPosts] = useState<Post[]>([])
     const [query, setQuery] = useState("")
+    const [newTitle, setNewTitle] = useState("")
+    const [newBody, setNewBody] = useState("")
 
     useEffect(() => {
         fetch('https://dummyjson.com/posts?limit=30')
@@ -23,6 +25,30 @@ export function FeedPage() {
         }
     }
 
+    async function createPost() {
+        const res = await fetch('https://dummyjson.com/posts/add', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'} ,
+            body: JSON.stringify({
+                title: newTitle,
+                body: newBody,
+                userId: 1
+            })
+        })
+        const newPost = await res.json()
+
+        const completePost: Post = {
+            ...newPost,
+            reactions: newPost.reactions ?? { likes: 0, dislikes: 0},
+            views: newPost.views ?? 0,
+            tags: newPost.tags ?? [],
+        }
+
+        setAllPosts(prev => [completePost, ...prev])
+        setNewTitle("")
+        setNewBody("")
+    }
+
     const q = query.trim().toLowerCase()
     const feed = q
         ? allPosts.filter(post =>
@@ -34,6 +60,12 @@ export function FeedPage() {
 
     return (
         <div className="feed">
+            <input value={newTitle} onChange={e =>
+                setNewTitle(e.target.value)} placeholder="Title" />
+            <input value={newBody} onChange={e =>
+                setNewBody(e.target.value)} placeholder="Body" />
+            <button onClick={createPost}>Add Post</button>
+
             <input
             className="search-input"
             type="text"
